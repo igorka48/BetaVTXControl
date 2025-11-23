@@ -17,7 +17,7 @@ BetaVTXControl::~BetaVTXControl() {
     }
 }
 
-bool BetaVTXControl::begin(HardwareSerial* serial, uint8_t txPin, uint8_t rxPin) {
+bool BetaVTXControl::begin(HardwareSerial* serial, uint8_t txPin) {
     if (!serial) {
         return false;
     }
@@ -29,7 +29,7 @@ bool BetaVTXControl::begin(HardwareSerial* serial, uint8_t txPin, uint8_t rxPin)
     }
     
     if (_vtx) {
-        return _vtx->begin(serial, txPin, rxPin);
+        return _vtx->begin(serial, txPin);
     }
     return false;
 }

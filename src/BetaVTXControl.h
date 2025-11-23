@@ -18,9 +18,6 @@
 
 #define BETAVTXCONTROL_VERSION "1.0.0"
 
-#define VTX_DEFAULT_TX_PIN 16
-#define VTX_DEFAULT_RX_PIN 17
-
 enum VTXProtocolType {
     VTX_PROTOCOL_SMARTAUDIO,
     VTX_PROTOCOL_TRAMP
@@ -35,19 +32,18 @@ public:
     ~BetaVTXControl();
     
     /**
-     * @brief Initialize VTX communication
+     * @brief Initialize VTX communication (TX-only mode)
      * @param serial Pointer to HardwareSerial port
      * @param txPin TX pin number
-     * @param rxPin RX pin number
      * @return true if initialization successful
      */
-    bool begin(HardwareSerial* serial, uint8_t txPin = VTX_DEFAULT_TX_PIN, uint8_t rxPin = VTX_DEFAULT_RX_PIN);
+    bool begin(HardwareSerial* serial, uint8_t txPin);
     
     void update();
     bool isReady();
     
     /**
-     * @param freq Frequency in MHz (5000-5999)
+     * @param freq Frequency in MHz
      */
     bool setFrequency(uint16_t freq);
     

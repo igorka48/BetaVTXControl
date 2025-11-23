@@ -24,23 +24,22 @@ SmartAudioVTX::~SmartAudioVTX() {
     }
 }
 
-bool SmartAudioVTX::begin(HardwareSerial* serial, uint8_t txPin, uint8_t rxPin) {
+bool SmartAudioVTX::begin(HardwareSerial* serial, uint8_t txPin) {
     if (!serial) {
         return false;
     }
     
     _serial = serial;
     _txPin = txPin;
-    _rxPin = rxPin;
     
-    // Standard begin with separate TX/RX pins (hardware handles half-duplex)
+    // TX-only mode: configure serial with TX pin only
     // Fixed baud rate 4800 as per Betaflight/esp-fc
     _currentBaud = VTX_SMARTAUDIO_BAUD_4800;
     if (_serial) {
         _serial->end();
     }
     _serial->setTxBufferSize(VTX_TX_BUFFER_SIZE);
-    _serial->begin(_currentBaud, SERIAL_8N2, rxPin, txPin);
+    _serial->begin(_currentBaud, SERIAL_8N2, -1, txPin);  // RX=-1 (not used)
     
     _initPhase = INIT_START;
     _isReady = false;
@@ -116,10 +115,6 @@ bool SmartAudioVTX::isReady() {
 }
 
 bool SmartAudioVTX::setFrequency(uint16_t freq) {
-    if (!validateFrequency(freq)) {
-        return false;
-    }
-    
     uint8_t buf[7] = {
         SA_PREAMBLE_1, SA_PREAMBLE_2,
         (uint8_t)(SA_CMD_SET_FREQ << 1 | 1), 2,

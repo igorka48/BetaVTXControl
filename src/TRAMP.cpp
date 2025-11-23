@@ -19,22 +19,21 @@ TrampVTX::~TrampVTX() {
     }
 }
 
-bool TrampVTX::begin(HardwareSerial* serial, uint8_t txPin, uint8_t rxPin) {
+bool TrampVTX::begin(HardwareSerial* serial, uint8_t txPin) {
     if (!serial) {
         return false;
     }
     
     _serial = serial;
     _txPin = txPin;
-    _rxPin = rxPin;
     
-    // Standard begin with separate TX/RX pins (hardware handles half-duplex)
+    // TX-only mode: configure serial with TX pin only
     // Fixed baud rate 9600 as per TRAMP protocol
     if (_serial) {
         _serial->end();
     }
     _serial->setTxBufferSize(VTX_TX_BUFFER_SIZE);
-    _serial->begin(TRAMP_BAUD, SERIAL_8N1, rxPin, txPin);
+    _serial->begin(TRAMP_BAUD, SERIAL_8N1, -1, txPin);  // RX=-1 (not used)
     
     _status = STATUS_OFFLINE;
     _isReady = false;
@@ -135,10 +134,6 @@ bool TrampVTX::isReady() {
 }
 
 bool TrampVTX::setFrequency(uint16_t freq) {
-    if (!validateFrequency(freq)) {
-        return false;
-    }
-    
     _confFreq = freq;
     _retryCount = TRAMP_MAX_RETRIES;
     return true;

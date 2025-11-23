@@ -53,203 +53,100 @@ Copy the library to your project's `lib/` directory.
 
 ## Hardware Connection
 
-**Important:** GPIO 16 and 17 must be soldered together and connected to VTX control wire.
+**Important:** Only TX pin (GPIO 16) is needed - VTX control wire connects to TX only.
 
 ### Wiring Diagram
 
 ```
-ESP32 GPIO 16 (TX) ──┐
-                     ├──── VTX Control Wire (SmartAudio/TRAMP)
-ESP32 GPIO 17 (RX) ──┘
-ESP32 GND ────────────── VTX GND
+ESP32 GPIO 16 (TX) ────── VTX Control Wire (SmartAudio/TRAMP)
+ESP32 GND ───────────────── VTX GND
 ```
 
 **Notes:**
 - Both protocols use half-duplex UART on a single wire
-- Solder GPIO 16 and 17 together for proper operation
+- TX-only mode: Commands sent, no response expected
 - SmartAudio: 4800 baud, 8N2
 - TRAMP: 9600 baud, 8N1
-- TX-only mode: Commands sent, no response expected
 - Check VTX voltage level (3.3V or 5V) - use level shifter if needed
 
 ## Usage
 
-### Basic Example (TX-only mode)
-
 ```cpp
 #include <BetaVTXControl.h>
 
-// Select protocol: VTX_PROTOCOL_SMARTAUDIO or VTX_PROTOCOL_TRAMP
-BetaVTXControl vtx(VTX_PROTOCOL_SMARTAUDIO);
+BetaVTXControl vtx(VTX_PROTOCOL_SMARTAUDIO); // or VTX_PROTOCOL_TRAMP
 
 void setup() {
   Serial.begin(115200);
   
-  // Initialize on Serial2 (GPIO 16 & 17 soldered together)
-  if (vtx.begin(&Serial2, VTX_DEFAULT_TX_PIN, VTX_DEFAULT_RX_PIN)) {
-    Serial.println("VTX initialized!");
-    
-    // Configure VTX (commands sent immediately)
-    vtx.setFrequency(5732);  // R1 (Raceband 1)
+  if (vtx.begin(&Serial2, 16)) {  // GPIO 16 = TX
+    vtx.setFrequency(5732);       // R3 (Raceband 3)
     delay(300);
-    
-    vtx.setPower(200);       // 200mW
+    vtx.setPower(200);            // 200mW
     delay(300);
-    
-    vtx.setPitMode(false);   // Pit mode OFF
-    delay(300);
-    
-    Serial.println("VTX configured!");
+    vtx.setPitMode(false);
   }
 }
 
 void loop() {
-  vtx.update();
-  
-  // Periodically send commands to maintain state
-  static unsigned long lastUpdate = 0;
-  if (millis() - lastUpdate >= 5000) {
-    vtx.setFrequency(5732);
-    vtx.setPower(200);
-    lastUpdate = millis();
-  }
-  
-  delay(10);
-}
-```
-
-### SmartAudio Direct Example
-
-```cpp
-#include <SmartAudio.h>
-
-SmartAudioVTX vtx;
-
-void setup() {
-  Serial.begin(115200);
-  
-  // Initialize on Serial2 (GPIO 16/17)
-  if (vtx.begin(&Serial2, 16, 17)) {
-    Serial.println("SmartAudio VTX initialized!");
-  }
-}
-
-void loop() {
-  vtx.update(); // Call regularly for command queue processing
-  
-  // Set frequency to Raceband Channel 1 (5658 MHz)
-  vtx.setFrequency(5658);
-  delay(300);
-  
-  // Set power to 200mW
-  vtx.setPower(200);
-  delay(300);
-  
-  // Enable pit mode
-  vtx.setPitMode(true);
-  delay(300);
-}
-```
-
-### TRAMP Direct Example
-
-```cpp
-#include <TRAMP.h>
-
-TrampVTX vtx;
-
-void setup() {
-  Serial.begin(115200);
-  
-  // Initialize on Serial2
-  if (vtx.begin(&Serial2, 16, 17)) {
-    Serial.println("TRAMP VTX initialized!");
-  }
-}
-
-void loop() {
-  vtx.update();
-  
-  if (vtx.isReady()) {
-    // Set frequency
-    vtx.setFrequency(5740);
-    delay(300);
-    
-    // Set power level
-    vtx.setPower(400); // 400mW
-    delay(300);
-  }
-  
-  delay(100);
+  delay(100);  // TX-only: configure once in setup()
 }
 ```
 
 ## API Reference
 
-### Common Methods (VTXProtocol)
+### Initialization
 
-#### `bool begin(HardwareSerial* serial, uint8_t txPin = 16, uint8_t rxPin = 17)`
-Initialize the VTX connection.
+```cpp
+BetaVTXControl vtx(VTX_PROTOCOL_SMARTAUDIO);  // or VTX_PROTOCOL_TRAMP
+bool begin(HardwareSerial* serial, uint8_t txPin = 16);
+```
 
-#### `void update()`
-Process incoming data and state machine. **Must be called regularly!**
+### Configuration Methods
 
-#### `bool isReady()`
-Check if VTX is detected and ready.
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `setFrequency(freq)` | `uint16_t freq` | Set frequency in MHz (5000-5999) |
+| `setPower(power)` | `uint16_t power` | Set power in mW (25, 200, 400, 600, 800) |
+| `setPitMode(enable)` | `bool enable` | Enable/disable pit mode (low power) |
 
-#### `bool setFrequency(uint16_t freq)`
-Set frequency in MHz (5000-5999).
+**Note:** TX-only mode - commands are sent immediately, no response expected. Add 300ms delay between commands.
 
-#### `bool setPower(uint16_t power)`
-Set power in mW (e.g., 25, 200, 400, 600).
+### Direct Protocol Access
 
-#### `bool setPitMode(bool enable)`
-Enable/disable pit mode (low power).
+```cpp
+#include <SmartAudio.h>
+SmartAudioVTX vtx;
+vtx.begin(&Serial2, 16);
+
+#include <TRAMP.h>
+TrampVTX vtx;
+vtx.begin(&Serial2, 16);
+```
 
 ## Protocol Details
 
-### SmartAudio Protocol
+| | SmartAudio | TRAMP |
+|---|------------|-------|
+| **Baudrate** | 4800 (8N2) | 9600 (8N1) |
+| **Validation** | CRC8 (0xD5) | Checksum |
+| **Packet Start** | `0xAA 0x55` | `0x0F` |
+| **Versions** | v1, v2, v2.1 | - |
 
-- **Baudrate:** 4800-4950 (auto-detected)
-- **Packet format:** `[0xAA][0x55][CMD][LEN][DATA...][CRC8]`
-- **CRC:** Polynomial 0xD5
-- **Versions:** v1, v2, v2.1
-
-### TRAMP Protocol
-
-- **Baudrate:** 9600 (fixed)
-- **Packet format:** `[0x0F][CMD][PARAM_LO][PARAM_HI][...][CHECKSUM][0x00]`
-- **Packet size:** 16 bytes
-- **Commands:** 'r', 'v', 's', 'F', 'P', 'I'
-
-## Frequency Tables
-
-### Raceband (Band 5)
-| Channel | Frequency |
-|---------|-----------|
-| 1 | 5658 MHz |
-| 2 | 5695 MHz |
-| 3 | 5732 MHz |
-| 4 | 5769 MHz |
-| 5 | 5806 MHz |
-| 6 | 5843 MHz |
-| 7 | 5880 MHz |
-| 8 | 5917 MHz |
-
-See [frequency tables](docs/FREQUENCIES.md) for all bands.
+See [frequency tables](docs/FREQUENCIES.md) for channel mappings.
 
 ## Troubleshooting
 
-### VTX not detected
-- Check wiring and voltage levels
-- Verify UART pins (default GPIO 16/17)
-- Ensure VTX is powered
-- Call `update()` regularly in loop()
+**VTX not responding:**
+- Check wiring (TX on GPIO 16, common GND)
+- Verify VTX is powered
+- Check voltage levels (use level shifter for 5V VTX)
+- Try opposite protocol (SmartAudio ↔ TRAMP)
 
-### Commands not working
-- VTX might be in race lock mode
-- Check protocol compatibility (SmartAudio vs TRAMP)
-- Verify baud rate (SmartAudio auto-detects)
+**Commands ignored:**
+- VTX may be in race lock mode
+- Add 300ms delays between commands
+- Power cycle VTX
 
 ## Contributing
 

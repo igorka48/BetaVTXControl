@@ -52,7 +52,7 @@ public:
     SmartAudioVTX();
     ~SmartAudioVTX();
     
-    bool begin(HardwareSerial* serial, uint8_t txPin = 16, uint8_t rxPin = 17) override;
+    bool begin(HardwareSerial* serial, uint8_t txPin) override;
     void update() override;
     bool isReady() override;
     bool setFrequency(uint16_t freq) override;
