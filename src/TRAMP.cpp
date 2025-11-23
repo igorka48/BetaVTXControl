@@ -156,18 +156,6 @@ bool TrampVTX::setPitMode(bool enable) {
     return true;
 }
 
-uint16_t TrampVTX::getFrequency() {
-    return _curFreq;
-}
-
-uint16_t TrampVTX::getPower() {
-    return _curPower;
-}
-
-bool TrampVTX::getPitMode() {
-    return _curPitMode;
-}
-
 // ===== Private Methods =====
 
 uint8_t TrampVTX::calculateChecksum(const uint8_t* buf) {

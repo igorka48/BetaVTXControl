@@ -58,9 +58,6 @@ public:
     bool setFrequency(uint16_t freq) override;
     bool setPower(uint16_t power) override;
     bool setPitMode(bool enable) override;
-    uint16_t getFrequency() override;
-    uint16_t getPower() override;
-    bool getPitMode() override;
     
     /**
      * @brief Set band and channel
@@ -69,11 +66,6 @@ public:
      * @return true if command sent successfully
      */
     bool setBandAndChannel(uint8_t band, uint8_t channel);
-    
-    /**
-     * @return SmartAudio version (1, 2, or 3 for v2.1)
-     */
-    uint8_t getVersion() { return _saVersion; }
     
     struct Statistics {
         uint16_t packetsSent;
@@ -103,11 +95,9 @@ private:
     };
     
     uint8_t _saVersion = 0;
-    uint8_t _saChannel = 0;
+    uint8_t _saChan = 0;
     uint8_t _saPower = 0;
     uint8_t _saMode = 0;
-    uint16_t _saFreq = 0;
-    uint16_t _saPitFreq = 0;
     
     ReceiveState _rxState = WAIT_PREAMBLE_1;
     InitPhase _initPhase = INIT_START;

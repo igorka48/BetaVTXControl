@@ -57,15 +57,3 @@ bool BetaVTXControl::setPower(uint16_t power) {
 bool BetaVTXControl::setPitMode(bool enable) {
     return _vtx ? _vtx->setPitMode(enable) : false;
 }
-
-uint16_t BetaVTXControl::getFrequency() {
-    return _vtx ? _vtx->getFrequency() : 0;
-}
-
-uint16_t BetaVTXControl::getPower() {
-    return _vtx ? _vtx->getPower() : 0;
-}
-
-bool BetaVTXControl::getPitMode() {
-    return _vtx ? _vtx->getPitMode() : false;
-}

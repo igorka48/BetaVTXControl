@@ -61,10 +61,6 @@ public:
      */
     bool setPitMode(bool enable);
     
-    uint16_t getFrequency();
-    uint16_t getPower();
-    bool getPitMode();
-    
     /**
      * @return Protocol type
      */

@@ -42,28 +42,6 @@ public:
     bool setFrequency(uint16_t freq) override;
     bool setPower(uint16_t power) override;
     bool setPitMode(bool enable) override;
-    uint16_t getFrequency() override;
-    uint16_t getPower() override;
-    bool getPitMode() override;
-    
-    /**
-     * @return VTX temperature in Celsius
-     */
-    uint16_t getTemperature() { return _temperature; }
-    
-    /**
-     * @return Actual transmit power in mW
-     */
-    uint16_t getActualPower() { return _actualPower; }
-    
-    /**
-     * @return true if race lock is active
-     */
-    bool isRaceLocked() { return (_controlMode & TRAMP_CONTROL_RACE_LOCK); }
-    
-    uint16_t getMinFrequency() { return _minFreq; }
-    uint16_t getMaxFrequency() { return _maxFreq; }
-    uint16_t getMaxPower() { return _maxPower; }
 
 private:
     enum Status {
@@ -83,18 +61,6 @@ private:
     uint16_t _confFreq = 0;
     uint16_t _confPower = 0;
     bool _confPitMode = false;
-    
-    uint16_t _curFreq = 0;
-    uint16_t _curPower = 0;
-    bool _curPitMode = false;
-    uint16_t _actualPower = 0;
-    uint16_t _temperature = 0;
-    
-    uint16_t _minFreq = VTX_MIN_FREQUENCY_MHZ;
-    uint16_t _maxFreq = VTX_MAX_FREQUENCY_MHZ;
-    uint16_t _maxPower = 600;
-    
-    uint8_t _controlMode = 0;
     
     Status _status = STATUS_OFFLINE;
     ReceiveState _rxState = RX_WAIT_LEN;

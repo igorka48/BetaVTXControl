@@ -34,56 +34,39 @@ void setup() {
 void loop() {
   vtx.update();
   
+void loop() {
+  vtx.update();
+  
   if (vtx.isReady()) {
-    static bool infoDisplayed = false;
-    if (!infoDisplayed) {
-      Serial.println("\n✓ VTX is ready!");
-      Serial.print("Version: SmartAudio v");
-      Serial.println(vtx.getVersion());
-      Serial.print("Current Frequency: ");
-      Serial.print(vtx.getFrequency());
-      Serial.println(" MHz");
-      Serial.print("Current Power: ");
-      Serial.print(vtx.getPower());
-      Serial.println(" mW");
-      Serial.print("Pit Mode: ");
-      Serial.println(vtx.getPitMode() ? "ON" : "OFF");
-      
-      infoDisplayed = true;
-      
-      Serial.println("\nConfiguring VTX...");
+    static bool configured = false;
+    if (!configured) {
+      Serial.println("\nVTX is ready!");
+      Serial.println("Configuring VTX...");
       
       vtx.setBandAndChannel(5, 1);
-      Serial.println("✓ Set to Raceband CH1 (5658 MHz)");
+      Serial.println("Set to Raceband CH1 (5658 MHz)");
+      delay(300);
       
       vtx.setPower(200);
-      Serial.println("✓ Set power to 200mW");
+      Serial.println("Set power to 200mW");
+      delay(300);
       
       vtx.setPitMode(false);
-      Serial.println("✓ Pit mode disabled");
+      Serial.println("Pit mode disabled");
+      delay(300);
       
-      Serial.println("\nVTX configured! Monitoring status...\n");
+      Serial.println("VTX configured!\n");
+      configured = true;
     }
     
+    // Periodically send commands to maintain state
     static unsigned long lastUpdate = 0;
     if (millis() - lastUpdate >= 5000) {
-      Serial.println("--- Status ---");
-      Serial.print("Freq: ");
-      Serial.print(vtx.getFrequency());
-      Serial.print(" MHz | Power: ");
-      Serial.print(vtx.getPower());
-      Serial.print(" mW | Pit: ");
-      Serial.println(vtx.getPitMode() ? "ON" : "OFF");
-      
-      // Display statistics
-      auto stats = vtx.getStatistics();
-      Serial.print("Packets - Sent: ");
-      Serial.print(stats.packetsSent);
-      Serial.print(", Received: ");
-      Serial.print(stats.packetsReceived);
-      Serial.print(", CRC Errors: ");
-      Serial.println(stats.crcErrors);
-      Serial.println();
+      Serial.println("--- Sending periodic commands ---");
+      vtx.setBandAndChannel(5, 1);
+      delay(300);
+      vtx.setPower(200);
+      delay(300);
       
       lastUpdate = millis();
     }
@@ -96,5 +79,7 @@ void loop() {
     }
   }
   
-  delay(10); // Small delay to prevent tight loop
+  delay(10);
+}
+
 }

@@ -173,13 +173,11 @@ void loop() {
   if (vtx.isReady()) {
     // Set frequency
     vtx.setFrequency(5740);
+    delay(300);
     
     // Set power level
     vtx.setPower(400); // 400mW
-    
-    // Get temperature
-    uint16_t temp = vtx.getTemperature();
-    Serial.printf("VTX Temperature: %d°C\n", temp);
+    delay(300);
   }
   
   delay(100);
@@ -207,33 +205,6 @@ Set power in mW (e.g., 25, 200, 400, 600).
 
 #### `bool setPitMode(bool enable)`
 Enable/disable pit mode (low power).
-
-#### `uint16_t getFrequency()`
-Get current frequency.
-
-#### `uint16_t getPower()`
-Get current power level.
-
-#### `bool getPitMode()`
-Get current pit mode status.
-
-### SmartAudio Specific
-
-#### `bool setBandAndChannel(uint8_t band, uint8_t channel)`
-Set band (1-5) and channel (1-8).
-- Band 1: A (Boscam A)
-- Band 2: B (Boscam B)
-- Band 3: E (Boscam E)
-- Band 4: F (Fatshark/NexWave)
-- Band 5: R (Raceband)
-
-#### `uint8_t getVersion()`
-Get SmartAudio version (1, 2, or 3).
-
-### TRAMP Specific
-
-#### `uint16_t getTemperature()`
-Get VTX temperature in Celsius.
 
 ## Protocol Details
 

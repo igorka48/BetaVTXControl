@@ -64,10 +64,6 @@ public:
      * @param enable true to enable pit mode
      */
     virtual bool setPitMode(bool enable) = 0;
-    
-    virtual uint16_t getFrequency() = 0;
-    virtual uint16_t getPower() = 0;
-    virtual bool getPitMode() = 0;
 
 protected:
     HardwareSerial* _serial = nullptr;
@@ -75,9 +71,6 @@ protected:
     uint8_t _rxPin = 17;
     
     bool _isReady = false;
-    uint16_t _currentFreq = 0;
-    uint16_t _currentPower = 0;
-    bool _pitMode = false;
     
     bool validateFrequency(uint16_t freq) {
         return (freq >= VTX_MIN_FREQUENCY_MHZ && freq <= VTX_MAX_FREQUENCY_MHZ);

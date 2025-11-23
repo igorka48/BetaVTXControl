@@ -176,22 +176,9 @@ bool SmartAudioVTX::setBandAndChannel(uint8_t band, uint8_t channel) {
     return true;
 }
 
-uint16_t SmartAudioVTX::getFrequency() {
-    return _saFreq;
-}
-
-uint16_t SmartAudioVTX::getPower() {
-    return _saPower;
-}
-
-bool SmartAudioVTX::getPitMode() {
-    return (_saMode & SA_MODE_GET_PITMODE) != 0;
-}
-
 // ===== Private Methods =====
 
 uint8_t SmartAudioVTX::calculateCRC8(const uint8_t* data, uint8_t len) {
-    uint8_t crc = 0;
     
     for (uint8_t i = 0; i < len; i++) {
         crc ^= data[i];
