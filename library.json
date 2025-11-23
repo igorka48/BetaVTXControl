@@ -1,0 +1,28 @@
+{
+  "name": "BetaVTXControl",
+  "version": "1.0.0",
+  "description": "ESP32 library for controlling VTX modules via SmartAudio and TRAMP protocols. Based on Betaflight implementation. Optimized for PlatformIO.",
+  "keywords": ["vtx", "video transmitter", "smartaudio", "tramp", "fpv", "drone", "esp32", "betaflight", "platformio"],
+  "authors": [
+    {
+      "name": "BetaVTXControl Contributors",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/igorka48/BetaVTXControl.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/igorka48/BetaVTXControl",
+  "frameworks": ["arduino", "espidf"],
+  "platforms": ["espressif32"],
+  "export": {
+    "include": [
+      "src/*",
+      "examples/*",
+      "README.md",
+      "LICENSE"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+#######################################
+# Syntax Coloring Map For BetaVTXControl
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+BetaVTXControl	KEYWORD1
+SmartAudioVTX	KEYWORD1
+TrampVTX	KEYWORD1
+VTXProtocol	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+update	KEYWORD2
+setFrequency	KEYWORD2
+setPower	KEYWORD2
+setPitMode	KEYWORD2
+setBandAndChannel	KEYWORD2
+getFrequency	KEYWORD2
+getPower	KEYWORD2
+getPitMode	KEYWORD2
+isReady	KEYWORD2
+getVersion	KEYWORD2
+getTemperature	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+VTX_PROTOCOL_SMARTAUDIO	LITERAL1
+VTX_PROTOCOL_TRAMP	LITERAL1
+VTX_PROTOCOL_AUTO	LITERAL1
