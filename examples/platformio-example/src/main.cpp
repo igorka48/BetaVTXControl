@@ -13,6 +13,9 @@
 #include <Arduino.h>
 #include <BetaVTXControl.h>
 
+// Hardware configuration
+#define VTX_TX_PIN 16  // ESP32 GPIO pin for VTX control
+
 // Select protocol: VTX_PROTOCOL_SMARTAUDIO or VTX_PROTOCOL_TRAMP
 BetaVTXControl vtx(VTX_PROTOCOL_SMARTAUDIO);
 
@@ -24,12 +27,12 @@ void setup() {
   Serial.println("====================================");
   Serial.println("Protocol: SmartAudio (TX-only)");
   
-  if (vtx.begin(&Serial2, VTX_DEFAULT_TX_PIN)) {
+  if (vtx.begin(&Serial2, VTX_TX_PIN)) {
     Serial.println("VTX initialized");
     
     // Configure VTX (commands are sent but responses not expected in TX-only mode)
     Serial.println("\nConfiguring VTX...");
-    vtx.setFrequency(5732);  // R1 (Raceband 1)
+    vtx.setFrequency(5732);  // R3 (Raceband 3)
     delay(300);
     
     vtx.setPower(200);       // 200mW

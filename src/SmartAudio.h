@@ -15,6 +15,12 @@
 #define VTX_SMARTAUDIO_BAUD_4800    4800
 #define VTX_TX_BUFFER_SIZE          255
 
+// Band and channel constants for setBandAndChannel()
+#define VTX_MIN_BAND        1
+#define VTX_MAX_BAND        5
+#define VTX_MIN_CHANNEL     1
+#define VTX_MAX_CHANNEL     8
+
 #define SA_MAX_PACKET_LEN   21
 
 #define SA_CMD_NONE         0x00
@@ -67,6 +73,14 @@ public:
      */
     bool setBandAndChannel(uint8_t band, uint8_t channel);
     
+    /**
+     * @brief Set power by raw index (0-4)
+     * Use this if setPower(mW) doesn't work for your VTX
+     * @param index Power index (device-specific, typically 0-4)
+     * @return true if command sent successfully
+     */
+    bool setPowerByIndex(uint8_t index);
+    
     struct Statistics {
         uint16_t packetsSent;
         uint16_t packetsReceived;
@@ -96,8 +110,12 @@ private:
     
     uint8_t _saVersion = 0;
     uint8_t _saChan = 0;
+    uint8_t _saChannel = 0;  // Channel from settings response
     uint8_t _saPower = 0;
     uint8_t _saMode = 0;
+    uint16_t _saFreq = 0;      // Current frequency from VTX
+    uint16_t _saPitFreq = 0;   // Pit mode frequency
+    uint16_t _currentBaud = VTX_SMARTAUDIO_BAUD_4800;
     
     ReceiveState _rxState = WAIT_PREAMBLE_1;
     InitPhase _initPhase = INIT_START;
@@ -120,6 +138,7 @@ private:
     
     Statistics _stats = {0, 0, 0, 0, 0};
     
+    uint8_t powerMwToIndex(uint16_t powerMw);
     uint8_t calculateCRC8(const uint8_t* data, uint8_t len);
     void sendFrame(uint8_t* buf, uint8_t len);
     void queueCommand(uint8_t* buf, uint8_t len);

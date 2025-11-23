@@ -36,8 +36,10 @@ bool TrampVTX::begin(HardwareSerial* serial, uint8_t txPin) {
     _serial->begin(TRAMP_BAUD, SERIAL_8N1, -1, txPin);  // RX=-1 (not used)
     
     _status = STATUS_OFFLINE;
-    _isReady = false;
     _retryCount = TRAMP_MAX_RETRIES;
+    
+    // In TX-only mode, we're ready immediately after begin()
+    _isReady = true;
     
     return true;
 }
@@ -130,24 +132,35 @@ void TrampVTX::update() {
 }
 
 bool TrampVTX::isReady() {
-    return _isReady && _status >= STATUS_ONLINE_MONITOR_FREQPWRPIT;
+    // In TX-only mode, we're ready immediately after begin()
+    return _isReady;
 }
 
 bool TrampVTX::setFrequency(uint16_t freq) {
     _confFreq = freq;
     _retryCount = TRAMP_MAX_RETRIES;
+    
+    // In TX-only mode, send immediately
+    sendCommand(TRAMP_CMD_SET_FREQ, freq);
     return true;
 }
 
 bool TrampVTX::setPower(uint16_t power) {
     _confPower = power;
     _retryCount = TRAMP_MAX_RETRIES;
+    
+    // In TX-only mode, send immediately
+    sendCommand(TRAMP_CMD_SET_POWER, power);
     return true;
 }
 
 bool TrampVTX::setPitMode(bool enable) {
     _confPitMode = enable;
     _retryCount = TRAMP_MAX_RETRIES;
+    
+    // In TX-only mode, send immediately
+    // TRAMP: active=1 means normal power (pit OFF), active=0 means pit mode (pit ON)
+    sendCommand(TRAMP_CMD_SET_ACTIVE, enable ? 0 : 1);
     return true;
 }
 

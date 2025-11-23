@@ -74,17 +74,20 @@ ESP32 GND ───────────────── VTX GND
 ```cpp
 #include <BetaVTXControl.h>
 
+#define VTX_TX_PIN 16  // ESP32 GPIO pin for VTX control
+
 BetaVTXControl vtx(VTX_PROTOCOL_SMARTAUDIO); // or VTX_PROTOCOL_TRAMP
 
 void setup() {
   Serial.begin(115200);
   
-  if (vtx.begin(&Serial2, 16)) {  // GPIO 16 = TX
+  if (vtx.begin(&Serial2, VTX_TX_PIN)) {
     vtx.setFrequency(5732);       // R3 (Raceband 3)
-    delay(300);
+    delay(300);                   // IMPORTANT: Wait between commands
     vtx.setPower(200);            // 200mW
     delay(300);
     vtx.setPitMode(false);
+    delay(300);
   }
 }
 
@@ -92,6 +95,12 @@ void loop() {
   delay(100);  // TX-only: configure once in setup()
 }
 ```
+
+**Important Notes:**
+- **SmartAudio**: Power is specified in mW but converted to device index (0-4)
+- **TRAMP**: Power is sent directly in mW
+- Always add 300ms delay between commands to ensure VTX processes each one
+- Some VTX devices may require longer delays (500ms+)
 
 ## API Reference
 
@@ -117,11 +126,11 @@ bool begin(HardwareSerial* serial, uint8_t txPin = 16);
 ```cpp
 #include <SmartAudio.h>
 SmartAudioVTX vtx;
-vtx.begin(&Serial2, 16);
+vtx.begin(&Serial2, 16);  // TX pin
 
 #include <TRAMP.h>
 TrampVTX vtx;
-vtx.begin(&Serial2, 16);
+vtx.begin(&Serial2, 16);  // TX pin
 ```
 
 ## Protocol Details
@@ -147,6 +156,12 @@ See [frequency tables](docs/FREQUENCIES.md) for channel mappings.
 - VTX may be in race lock mode
 - Add 300ms delays between commands
 - Power cycle VTX
+
+**Power commands not working (SmartAudio):**
+- SmartAudio uses power index (0-4), not direct mW
+- Different VTX models have different power tables
+- Try `setPowerByIndex(0)` through `setPowerByIndex(4)` to find working values
+- Example: `vtx.setPowerByIndex(2)` might be 400mW on your VTX
 
 ## Contributing
 

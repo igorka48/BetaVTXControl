@@ -42,7 +42,9 @@ bool SmartAudioVTX::begin(HardwareSerial* serial, uint8_t txPin) {
     _serial->begin(_currentBaud, SERIAL_8N2, -1, txPin);  // RX=-1 (not used)
     
     _initPhase = INIT_START;
-    _isReady = false;
+    
+    // In TX-only mode, we're ready immediately after begin()
+    _isReady = true;
     
     return true;
 }
@@ -111,7 +113,8 @@ void SmartAudioVTX::update() {
 }
 
 bool SmartAudioVTX::isReady() {
-    return _isReady && _saVersion > 0;
+    // In TX-only mode, we're ready immediately after begin()
+    return _isReady;
 }
 
 bool SmartAudioVTX::setFrequency(uint16_t freq) {
@@ -123,30 +126,50 @@ bool SmartAudioVTX::setFrequency(uint16_t freq) {
     };
     buf[6] = calculateCRC8(buf, 6);
     
-    queueCommand(buf, 7);
+    // In TX-only mode, send immediately
+    sendFrame(buf, 7);
     return true;
 }
 
 bool SmartAudioVTX::setPower(uint16_t power) {
+    // Convert milliwatts to power index
+    // SmartAudio uses power index (0-4), not direct mW
+    // Different VTX models may have different power tables
+    uint8_t powerIndex = powerMwToIndex(power);
+    return setPowerByIndex(powerIndex);
+}
+
+bool SmartAudioVTX::setPowerByIndex(uint8_t index) {
+    // Send raw power index to VTX
     uint8_t buf[6] = {
         SA_PREAMBLE_1, SA_PREAMBLE_2,
         (uint8_t)(SA_CMD_SET_POWER << 1 | 1), 1,
-        (uint8_t)power,
+        index,
         0
     };
     buf[5] = calculateCRC8(buf, 5);
     
-    queueCommand(buf, 6);
+    // In TX-only mode, send immediately
+    sendFrame(buf, 6);
     return true;
 }
 
 bool SmartAudioVTX::setPitMode(bool enable) {
-    if (_saVersion < 2) {
-        return false;
-    }
+    // Note: Pit mode requires SmartAudio v2+, but in TX-only mode we can't check version
+    // User should know their VTX supports this feature
     
     uint8_t mode = enable ? SA_MODE_SET_IN_RANGE : SA_MODE_CLR_PITMODE;
-    setMode(mode);
+    
+    uint8_t buf[6] = {
+        SA_PREAMBLE_1, SA_PREAMBLE_2,
+        (uint8_t)(SA_CMD_SET_MODE << 1 | 1), 1,
+        mode,
+        0
+    };
+    buf[5] = calculateCRC8(buf, 5);
+    
+    // In TX-only mode, send immediately
+    sendFrame(buf, 6);
     return true;
 }
 
@@ -167,13 +190,27 @@ bool SmartAudioVTX::setBandAndChannel(uint8_t band, uint8_t channel) {
     };
     buf[5] = calculateCRC8(buf, 5);
     
-    queueCommand(buf, 6);
+    // In TX-only mode, send immediately
+    sendFrame(buf, 6);
     return true;
 }
 
 // ===== Private Methods =====
 
+uint8_t SmartAudioVTX::powerMwToIndex(uint16_t powerMw) {
+    // Convert milliwatts to SmartAudio power index
+    // Common power levels: 25mW=0, 200mW=1, 400mW=2, 600mW=3, 800mW=4
+    // This is a best-effort mapping for TX-only mode
+    // Note: Actual VTX power levels may vary by device
+    if (powerMw <= 50) return 0;      // 25mW
+    if (powerMw <= 300) return 1;     // 200mW
+    if (powerMw <= 500) return 2;     // 400mW or 500mW
+    if (powerMw <= 700) return 3;     // 600mW
+    return 4;                          // 800mW or 1W+
+}
+
 uint8_t SmartAudioVTX::calculateCRC8(const uint8_t* data, uint8_t len) {
+    uint8_t crc = 0;
     
     for (uint8_t i = 0; i < len; i++) {
         crc ^= data[i];

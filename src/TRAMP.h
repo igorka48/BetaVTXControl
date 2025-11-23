@@ -62,6 +62,16 @@ private:
     uint16_t _confPower = 0;
     bool _confPitMode = false;
     
+    uint16_t _curFreq = 0;
+    uint16_t _curPower = 0;
+    bool _curPitMode = false;
+    uint16_t _minFreq = 0;
+    uint16_t _maxFreq = 0;
+    uint16_t _maxPower = 0;
+    uint8_t _controlMode = 0;
+    uint16_t _actualPower = 0;
+    uint16_t _temperature = 0;
+    
     Status _status = STATUS_OFFLINE;
     ReceiveState _rxState = RX_WAIT_LEN;
     
@@ -79,6 +89,7 @@ private:
     char receive();
     char handleResponse();
     void resetReceiver();
+    bool isRaceLocked() const { return (_controlMode & TRAMP_CONTROL_RACE_LOCK) != 0; }
 };
 
 #endif

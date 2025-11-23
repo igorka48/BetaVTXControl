@@ -12,6 +12,8 @@
 #include <Arduino.h>
 #include <BetaVTXControl.h>
 
+#define VTX_TX_PIN 16  // ESP32 GPIO pin for VTX control
+
 SmartAudioVTX vtx;
 
 void setup() {
@@ -21,7 +23,7 @@ void setup() {
   Serial.println("SmartAudio VTX Control Example");
   Serial.println("================================");
   
-  if (vtx.begin(&Serial2, 16)) {
+  if (vtx.begin(&Serial2, VTX_TX_PIN)) {
     Serial.println("VTX initialized successfully");
     
     // Configure VTX
