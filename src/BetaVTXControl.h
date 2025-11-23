@@ -35,9 +35,10 @@ public:
      * @brief Initialize VTX communication (TX-only mode)
      * @param serial Pointer to HardwareSerial port
      * @param txPin TX pin number
+     * @param debugSerial Optional debug serial port for raw command output (default: nullptr)
      * @return true if initialization successful
      */
-    bool begin(HardwareSerial* serial, uint8_t txPin);
+    bool begin(HardwareSerial* serial, uint8_t txPin, HardwareSerial* debugSerial = nullptr);
     
     void update();
     bool isReady();

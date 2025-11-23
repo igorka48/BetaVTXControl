@@ -12,6 +12,7 @@
  *   8 - Pit Mode ON
  *   9 - Pit Mode OFF
  *   s - Switch protocol (SmartAudio/TRAMP)
+ *   d - Toggle debug mode
  *   h - Show help
  * 
  * Hardware:
@@ -27,11 +28,14 @@
 // Start with SmartAudio
 BetaVTXControl* vtx = nullptr;
 VTXProtocolType currentProtocol = VTX_PROTOCOL_SMARTAUDIO;
+bool debugEnabled = false;
 
 void printHelp() {
   Serial.println("\n=== VTX Control Interactive Test ===");
   Serial.print("Current Protocol: ");
   Serial.println(currentProtocol == VTX_PROTOCOL_SMARTAUDIO ? "SmartAudio" : "TRAMP");
+  Serial.print("Debug Mode: ");
+  Serial.println(debugEnabled ? "ON" : "OFF");
   Serial.println("\nFrequency Commands:");
   Serial.println("  1 - Set Raceband CH1 (5658 MHz)");
   Serial.println("  2 - Set Raceband CH3 (5732 MHz)");
@@ -46,6 +50,7 @@ void printHelp() {
   Serial.println("  9 - Pit Mode OFF");
   Serial.println("\nOther:");
   Serial.println("  s - Switch protocol");
+  Serial.println("  d - Toggle debug mode");
   Serial.println("  h - Show this help");
   Serial.println("====================================\n");
 }
@@ -57,9 +62,15 @@ void initVTX() {
   
   vtx = new BetaVTXControl(currentProtocol);
   
-  if (vtx->begin(&Serial2, VTX_TX_PIN)) {
+  // Pass debug serial if debug enabled
+  HardwareSerial* debugSerial = debugEnabled ? &Serial : nullptr;
+  
+  if (vtx->begin(&Serial2, VTX_TX_PIN, debugSerial)) {
     Serial.print("VTX initialized (");
     Serial.print(currentProtocol == VTX_PROTOCOL_SMARTAUDIO ? "SmartAudio" : "TRAMP");
+    if (debugEnabled) {
+      Serial.print(", Debug: ON");
+    }
     Serial.println(")");
   } else {
     Serial.println("VTX initialization failed!");
@@ -153,6 +164,14 @@ void loop() {
         Serial.print("Switching to ");
         Serial.println(currentProtocol == VTX_PROTOCOL_SMARTAUDIO ? "SmartAudio" : "TRAMP");
         initVTX();
+        break;
+        
+      case 'd':
+      case 'D':
+        debugEnabled = !debugEnabled;
+        Serial.print("Debug mode: ");
+        Serial.println(debugEnabled ? "ON (reinitialize VTX to apply)" : "OFF");
+        Serial.println("Press 's' to reinitialize with new debug setting");
         break;
         
       case 'h':

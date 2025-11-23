@@ -19,13 +19,14 @@ TrampVTX::~TrampVTX() {
     }
 }
 
-bool TrampVTX::begin(HardwareSerial* serial, uint8_t txPin) {
+bool TrampVTX::begin(HardwareSerial* serial, uint8_t txPin, HardwareSerial* debugSerial) {
     if (!serial) {
         return false;
     }
     
     _serial = serial;
     _txPin = txPin;
+    _debugSerial = debugSerial;
     
     // TX-only mode: configure serial with TX pin only
     // Fixed baud rate 9600 as per TRAMP protocol
@@ -40,6 +41,10 @@ bool TrampVTX::begin(HardwareSerial* serial, uint8_t txPin) {
     
     // In TX-only mode, we're ready immediately after begin()
     _isReady = true;
+    
+    if (_debugSerial) {
+        _debugSerial->println("[TRAMP] Debug enabled");
+    }
     
     return true;
 }
@@ -187,6 +192,9 @@ void TrampVTX::sendPacket(uint8_t cmd, uint16_t param) {
     _txBuffer[3] = (param >> 8) & 0xFF;
     _txBuffer[14] = calculateChecksum(_txBuffer);
     _txBuffer[15] = 0;
+    
+    // Debug output
+    debugPrintHex(_txBuffer, TRAMP_PACKET_SIZE, "TRAMP");
     
     // Send dummy byte for UART stabilization (as per esp-fc implementation)
     static const uint8_t dummyByte = 0x00;

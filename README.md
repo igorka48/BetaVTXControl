@@ -71,6 +71,8 @@ ESP32 GND ───────────────── VTX GND
 
 ## Usage
 
+### Basic Example
+
 ```cpp
 #include <BetaVTXControl.h>
 
@@ -94,6 +96,39 @@ void setup() {
 void loop() {
   delay(100);  // TX-only: configure once in setup()
 }
+```
+
+### Debug Mode (Optional)
+
+Enable debug output to see raw HEX commands sent to VTX:
+
+```cpp
+#include <BetaVTXControl.h>
+
+#define VTX_TX_PIN 16
+
+BetaVTXControl vtx(VTX_PROTOCOL_SMARTAUDIO);
+
+void setup() {
+  Serial.begin(115200);
+  
+  // Enable debug: pass Serial as third parameter
+  if (vtx.begin(&Serial2, VTX_TX_PIN, &Serial)) {
+    vtx.setFrequency(5732);
+    delay(300);
+  }
+}
+
+void loop() {
+  delay(100);
+}
+```
+
+**Debug output example:**
+```
+[SmartAudio] Debug enabled
+[SmartAudio] AA 55 09 02 16 64 7E
+[SmartAudio] AA 55 05 01 00 C4
 ```
 
 **Important Notes:**

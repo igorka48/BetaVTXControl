@@ -58,7 +58,7 @@ public:
     SmartAudioVTX();
     ~SmartAudioVTX();
     
-    bool begin(HardwareSerial* serial, uint8_t txPin) override;
+    bool begin(HardwareSerial* serial, uint8_t txPin, HardwareSerial* debugSerial = nullptr) override;
     void update() override;
     bool isReady() override;
     bool setFrequency(uint16_t freq) override;

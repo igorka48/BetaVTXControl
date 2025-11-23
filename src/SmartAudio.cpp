@@ -24,13 +24,14 @@ SmartAudioVTX::~SmartAudioVTX() {
     }
 }
 
-bool SmartAudioVTX::begin(HardwareSerial* serial, uint8_t txPin) {
+bool SmartAudioVTX::begin(HardwareSerial* serial, uint8_t txPin, HardwareSerial* debugSerial) {
     if (!serial) {
         return false;
     }
     
     _serial = serial;
     _txPin = txPin;
+    _debugSerial = debugSerial;
     
     // TX-only mode: configure serial with TX pin only
     // Fixed baud rate 4800 as per Betaflight/esp-fc
@@ -45,6 +46,10 @@ bool SmartAudioVTX::begin(HardwareSerial* serial, uint8_t txPin) {
     
     // In TX-only mode, we're ready immediately after begin()
     _isReady = true;
+    
+    if (_debugSerial) {
+        _debugSerial->println("[SmartAudio] Debug enabled");
+    }
     
     return true;
 }
@@ -231,8 +236,12 @@ void SmartAudioVTX::sendFrame(uint8_t* buf, uint8_t len) {
         return;
     }
     
+    // Debug output
+    debugPrintHex(buf, len, "SmartAudio");
+    
     // Send dummy byte for UART stabilization (as per esp-fc implementation)
     static const uint8_t dummyByte = 0x00;
+    _serial->write(&dummyByte, 1);
     _serial->write(&dummyByte, 1);
     
     // Send frame
